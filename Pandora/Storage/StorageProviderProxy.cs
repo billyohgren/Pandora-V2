@@ -136,12 +136,13 @@ namespace Pandora.Storage
             {
                 return FileSystemHelper.CombinePathLinux(path, value);
             }
+            if (OperatingSystem.IsWindows())
+            {
+                return FileSystemHelper.CombinePathWin(path, value);
+            }
             // Folder-copy suffixes start with a separator. Keep them relative
             // to the destination and preserve the local OS's path syntax.
-            var relativeValue = OperatingSystem.IsWindows()
-                ? value.TrimStart('/', '\\')
-                : value.TrimStart('/');
-            return System.IO.Path.Combine(path, relativeValue);
+            return System.IO.Path.Combine(path, value.TrimStart('/'));
         }
 
 

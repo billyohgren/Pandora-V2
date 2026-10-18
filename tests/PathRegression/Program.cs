@@ -29,8 +29,12 @@ try
 
     var folder = proxy.CombinePath(downloads, "folder");
     var nested = proxy.CombinePath(folder, "/child/example.7z");
-    if (nested != Path.Combine(downloads, "folder", "child", "example.7z"))
-        throw new Exception($"Nested download has wrong destination: {nested}");
+    var expectedChild = Path.Combine(downloads, "folder", "child", "example.7z");
+    Directory.CreateDirectory(Path.GetDirectoryName(expectedChild)!);
+    using (var stream = provider.OpenWriteStream(nested, 1) ?? throw new Exception("Cannot open nested destination"))
+        stream.WriteByte(43);
+    if (!File.Exists(expectedChild) || File.ReadAllBytes(expectedChild)[0] != 43)
+        throw new Exception($"Nested download missing from destination. Actual path: {nested}");
 
     if (!OperatingSystem.IsWindows())
     {

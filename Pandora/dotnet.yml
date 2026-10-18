@@ -10,6 +10,24 @@ permissions:
   contents: write
 
 jobs:
+  local-path-regression:
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v5.0.0
+    - uses: actions/setup-dotnet@v4.3.1
+      with:
+        dotnet-version: 8.0.x
+    - name: Check local download destinations
+      shell: bash
+      run: |
+        rid=$(dotnet --info | awk '/RID:/ { gsub("\r", ""); print $2; exit }')
+        dotnet run --project tests/PathRegression -r "$rid" --self-contained true -p:PublishReadyToRun=false
+
   build:
 
     runs-on: ubuntu-latest
